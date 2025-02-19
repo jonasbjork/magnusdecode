@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnus Safelink Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Magnus Safelink Decoder</h1>
+    <p>Klistra in din Safelink-URL nedan och klicka på "Avkoda" för att extrahera den ursprungliga URL:en.</p>
+    <form id="decoderForm">
+        <input type="text" id="safelinkInput" placeholder="Klistra in Safelink-URL här" required>
+        <button type="submit">Avkoda</button>
+    </form>
+    <div id="result" class="hidden">
+        <p><strong>Avkodad URL:</strong> <span id="decodedUrl"></span></p>
+        <button id="copyButton">Kopiera till klippbord</button>
+    </div>
+
+    <script>
+        function decodeSafelink(safelinkUrl) {
+            if (!safelinkUrl) {
+                return "Ingen Safelink-URL angiven.";
+            }
+            safelinkUrl = safelinkUrl.replace(/^['"](.*)['"]$/, "$1");
+            safelinkUrl = safelinkUrl.replace(/\\/g, "");
+            const encodedUrlMatch = safelinkUrl.match(/url=([^&]*)/);
+            if (!encodedUrlMatch) {
+                return "Kunde inte extrahera URL från Safelink. Kontrollera att din sträng är korrekt.";
+            }
+            const encodedUrl = encodedUrlMatch[1];
+
+            try {
+                return decodeURIComponent(encodedUrl);
+            } catch (error) {
+                return "Misslyckades med att avkoda URL:en: " + error.message;
+            }
+        }
+
+        document.getElementById("decoderForm").addEventListener("submit", function (event) {
+            event.preventDefault(); 
+            const safelinkInput = document.getElementById("safelinkInput").value;
+            const resultDiv = document.getElementById("result");
+            const decodedUrlSpan = document.getElementById("decodedUrl");
+            const copyButton = document.getElementById("copyButton");
+
+            const decodedUrl = decodeSafelink(safelinkInput);
+
+            if (decodedUrl) {
+                resultDiv.classList.remove("hidden");
+                decodedUrlSpan.textContent = decodedUrl;
+
+                copyButton.addEventListener("click", function () {
+                    navigator.clipboard.writeText(decodedUrl)
+                        .then(() => {
+                            alert("Den avkodade URL:en har kopierats till klippbordet!");
+                        })
+                        .catch(err => {
+                            alert("Misslyckades med att kopiera länken till klippbordet: " + err);
+                        });
+                });
+            } else {
+                resultDiv.classList.add("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
+
